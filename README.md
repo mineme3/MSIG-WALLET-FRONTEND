@@ -47,8 +47,9 @@ foundryup
 ### Initialize Project
 
 ```bash
-forge init multisig-wallet
+git clone  https://github.com/sin70wan/MSIG-WALLET-FRONTEND.git
 cd multisig-wallet
+
 ```
 
 ---
@@ -56,7 +57,9 @@ cd multisig-wallet
 ## Run Tests
 
 ```bash
-forge test -vv
+npm install
+npm run dev
+
 ```
 
 ---

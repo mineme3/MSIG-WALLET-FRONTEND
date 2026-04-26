@@ -4,18 +4,24 @@ import { MultiSigWalletABI } from "./abi/MultiSigWallet";
 import { CONTRACT_ADDRESS } from "./config";
 import Dashboard from "./Dashboard";
 
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
+
 function App() {
   const [account, setAccount] = useState<string>("");
   const [contract, setContract] = useState<ethers.Contract | null>(null);
 
   const connectWallet = async () => {
-    if (!(window as any).ethereum) {
+    if (!window.ethereum) {
       alert("Please install MetaMask");
       return;
     }
 
     try {
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
@@ -74,7 +80,7 @@ function App() {
                 <div className="w-20 h-20 bg-gray-900 rounded-3xl rotate-12 border border-gray-800 flex items-center justify-center shadow-2xl">
                   <div className="w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
                 </div>
-                <div className="absolute inset-0 w-20 h-20 bg-blue-500/10 blur-2xl rounded-full"></div>
+                <div className="absolute inset-0 w-20 h-20 bg-blue-500 opacity-10 blur-2xl rounded-full"></div>
               </div>
               
               <h2 className="text-2xl font-bold text-gray-200">Awaiting Connection</h2>
