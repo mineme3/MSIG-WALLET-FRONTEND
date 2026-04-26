@@ -1,37 +1,54 @@
+// React hook for state management
 import { useState } from "react";
+// Ethers.js library for blockchain interaction
 import { ethers } from "ethers";
+// Contract ABI for interacting with the MultiSigWallet smart contract
 import { MultiSigWalletABI } from "./abi/MultiSigWallet";
+// Contract address configuration
 import { CONTRACT_ADDRESS } from "./config";
+// Dashboard component for managing multisig transactions
 import Dashboard from "./Dashboard";
 
+// Type declaration for MetaMask's window.ethereum object
 declare global {
   interface Window {
     ethereum: any;
   }
 }
 
+// Main App component handling wallet connection and authentication
 function App() {
+  // State to store the connected wallet address
   const [account, setAccount] = useState<string>("");
+  // State to store the initialized contract instance
   const [contract, setContract] = useState<ethers.Contract | null>(null);
 
+  // Handles MetaMask wallet connection and contract initialization
   const connectWallet = async () => {
+    // Check if MetaMask is installed
     if (!window.ethereum) {
       alert("Please install MetaMask");
       return;
     }
 
     try {
+      // Create an ethers provider using MetaMask's injected ethereum object
       const provider = new ethers.BrowserProvider(window.ethereum);
+      // Request account access from user
       await provider.send("eth_requestAccounts", []);
+      // Get the signer for transaction signing
       const signer = await provider.getSigner();
+      // Retrieve the connected wallet address
       const address = await signer.getAddress();
 
+      // Initialize contract instance with ABI, address, and signer
       const walletContract = new ethers.Contract(
         CONTRACT_ADDRESS,
         MultiSigWalletABI,
         signer
       );
 
+      // Update state with connected account and contract instance
       setAccount(address);
       setContract(walletContract);
     } catch (err) {

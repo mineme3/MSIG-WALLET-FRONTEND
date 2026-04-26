@@ -1,24 +1,36 @@
+// React hooks for state management and side effects
 import { useState, useEffect, useCallback } from "react";
+// Ethers.js for blockchain interaction and data formatting
 import { ethers } from "ethers";
 
+// Transaction interface defining the structure of a multisig transaction
 interface Tx {
-  to: string;
-  value: bigint;
-  data: string;
-  executed: boolean;
-  numConfirmations: bigint;
-  index: number;
+  to: string;              // Recipient address
+  value: bigint;           // Amount in wei
+  data: string;            // Transaction data payload
+  executed: boolean;       // Whether transaction has been executed
+  numConfirmations: bigint; // Number of owner confirmations received
+  index: number;           // Transaction index in the contract
 }
 
+// Dashboard component for managing multisig wallet transactions
 export default function Dashboard({ contract }: { contract: ethers.Contract }) {
+  // State for storing the list of transactions from the contract
   const [txs, setTxs] = useState<Tx[]>([]);
+  // Form input state for new transaction recipient address
   const [to, setTo] = useState("");
+  // Form input state for new transaction amount in ETH
   const [value, setValue] = useState("");
+  // State for storing authorized wallet owners
   const [owners, setOwners] = useState<string[]>([]);
+  // State for required number of confirmations to execute a transaction
   const [required, setRequired] = useState<number>(0);
+  // Loading state for submit transaction button
   const [submitting, setSubmitting] = useState(false);
+  // Loading state for individual transaction actions (confirm/execute/revoke)
   const [loadingTx, setLoadingTx] = useState<number | null>(null);
 
+  // Fetches all wallet data: transactions, owners, and required confirmations
   const loadData = useCallback(async () => {
     if (!contract) return;
 
@@ -30,6 +42,7 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
         contract.required()
       ]);
 
+      // Build transaction list by fetching each transaction detail
       const txList = [];
       for (let i = 0; i < Number(count); i++) {
         const tx = await contract.getTransaction(i);
@@ -43,6 +56,7 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
         });
       }
 
+      // Update state with fetched data
       setTxs(txList);
       setOwners(ownerList);
       setRequired(Number(requiredCount));
@@ -51,46 +65,57 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
     }
   }, [contract]);
 
+  // Effect to load data on component mount and set up real-time updates
   useEffect(() => {
     if (!contract) return;
 
+    // Initial data load
     loadData();
 
+    // Handler function to refresh data on contract events
     const handler = () => loadData();
 
-    // Event listeners for real-time updates
+    // Event listeners for real-time updates from the smart contract
     contract.on("SubmitTransaction", handler);
     contract.on("ConfirmTransaction", handler);
     contract.on("ExecuteTransaction", handler);
     contract.on("RevokeConfirmation", handler);
 
+    // Polling interval as fallback for data synchronization (every 30 seconds)
     const interval = setInterval(() => {
       loadData();
     }, 30000);
 
+    // Cleanup function to remove listeners and clear interval on unmount
     return () => {
       contract.removeAllListeners();
       clearInterval(interval);
     };
   }, [contract, loadData]);
 
+  // Submits a new transaction proposal to the multisig contract
   const submitTx = async () => {
     try {
+      // Validate form inputs
       if (!to || !value) {
         alert("Fill all fields");
         return;
       }
 
       setSubmitting(true);
+      // Call contract method to submit transaction (converts ETH to wei)
       const tx = await contract.submitTransaction(
         to,
         ethers.parseEther(value),
         "0x"
       );
 
+      // Wait for transaction confirmation
       await tx.wait();
+      // Clear form inputs after successful submission
       setTo("");
       setValue("");
+      // Refresh transaction list
       await loadData();
       alert("Transaction submitted!");
     } catch (err: any) {
@@ -101,11 +126,14 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
     }
   };
 
+  // Confirms an existing transaction as an authorized owner
   const confirmTx = async (id: number) => {
     try {
       setLoadingTx(id);
+      // Call contract method to confirm transaction
       const tx = await contract.confirmTransaction(id);
       await tx.wait();
+      // Refresh transaction list after confirmation
       await loadData();
     } catch (err: any) {
       console.error("CONFIRM ERROR:", err);
@@ -115,11 +143,14 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
     }
   };
 
+  // Executes a transaction after required confirmations threshold is met
   const executeTx = async (id: number) => {
     try {
       setLoadingTx(id);
+      // Call contract method to execute transaction
       const tx = await contract.executeTransaction(id);
       await tx.wait();
+      // Refresh transaction list after execution
       await loadData();
     } catch (err: any) {
       console.error(err);
@@ -129,11 +160,14 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
     }
   };
 
+  // Revokes a previous confirmation from the calling owner
   const revokeTx = async (id: number) => {
     try {
       setLoadingTx(id);
+      // Call contract method to revoke confirmation
       const tx = await contract.revokeConfirmation(id);
       await tx.wait();
+      // Refresh transaction list after revocation
       await loadData();
     } catch (err: any) {
       console.error(err);
