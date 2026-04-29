@@ -275,7 +275,7 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
                           tx.executed ? 'bg-green-500' : 
                           Number(tx.numConfirmations) >= required + 1 ? 'bg-yellow-400' : 'bg-primary'
                         }`}
-                        style={{ width: `${Math.min((Number(tx.numConfirmations) / required + 1) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((Number(tx.numConfirmations) / required ) * 100, 100)}%` }}
                       ></div>
                     </div>
                   </div>
