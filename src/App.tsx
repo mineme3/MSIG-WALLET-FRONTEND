@@ -12,7 +12,7 @@ import Dashboard from "./Dashboard";
 // Type declaration for MetaMask's window.ethereum object
 declare global {
   interface Window {
-    ethereum: any;
+    ethereum?: unknown;
   }
 }
 
