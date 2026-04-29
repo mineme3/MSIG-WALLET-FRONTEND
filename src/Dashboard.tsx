@@ -148,7 +148,7 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
       {/* Authorized Owners Section */}
       <div className="animate-in fade-in slide-in-from-top-4 duration-500">
         <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-gray-500 px-1">
-          Authorized Owners ({required + 1} Required)
+          Authorized Owners ({owners.length} total)
         </h2>
         <div className="bg-gray-900/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-800 shadow-inner">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
