@@ -148,7 +148,7 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
       {/* Authorized Owners Section */}
       <div className="animate-in fade-in slide-in-from-top-4 duration-500">
         <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-gray-500 px-1">
-          Authorized Owners ({3} Required)
+          Authorized Owners ({required + 1} Required)
         </h2>
         <div className="bg-gray-900/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-800 shadow-inner">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -267,15 +267,15 @@ export default function Dashboard({ contract }: { contract: ethers.Contract }) {
                   <div className="flex items-center gap-3">
                     <p className="text-lg font-bold text-white leading-none">
                       {/* Shows current / required (e.g., 1 / 3) */}
-                      {tx.numConfirmations.toString()} <span className="text-gray-600 text-sm">/ {3}</span>
+                      {tx.numConfirmations.toString()} <span className="text-gray-600 text-sm">/ {required +1}</span>
                     </p>
                     <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-1000 ${
                           tx.executed ? 'bg-green-500' : 
-                          Number(tx.numConfirmations) >= 3 ? 'bg-yellow-400' : 'bg-primary'
+                          Number(tx.numConfirmations) >= required + 1 ? 'bg-yellow-400' : 'bg-primary'
                         }`}
-                        style={{ width: `${Math.min((Number(tx.numConfirmations) / 3) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((Number(tx.numConfirmations) / required + 1) * 100, 100)}%` }}
                       ></div>
                     </div>
                   </div>
